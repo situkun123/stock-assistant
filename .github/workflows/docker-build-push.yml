@@ -21,14 +21,17 @@ jobs:
     steps:
       # Step 1: Checkout code
       - name: Checkout Repository
+        id: checkout
         uses: actions/checkout@v4
 
       # Step 2: Set up Docker Buildx for multi-platform builds
       - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@v3
 
       # Step 3: Login to DockerHub
       - name: Login to DockerHub
+        id: docker-login
         if: github.event_name != 'pull_request'  # Don't push on PRs
         uses: docker/login-action@v3
         with:
@@ -42,27 +45,25 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Tag with branch name
             type=ref,event=branch
-            # Tag with PR number
             type=ref,event=pr
-            # Tag with short git SHA
             type=sha,prefix=sha-
-            # Tag as latest on main branch only
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       # Step 5: Build and push
       - name: Build and Push Docker Image
+        id: build-and-push
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}  # Only push on non-PRs
+          push: ${{ github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64    # ✅ Build for both platforms
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha       # Use GitHub Actions cache
+          cache-from: type=gha
           cache-to: type=gha,mode=max
 
       # Step 6: Print image digest
       - name: Print Image Digest
+        id: print-digest
         run: echo "Image pushed with digest ${{ steps.build-and-push.outputs.digest }}"
