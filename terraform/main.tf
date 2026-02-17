@@ -10,16 +10,6 @@ terraform {
 provider "koyeb" {
 }
 
-import {
-  to = koyeb_app.stock_assistant
-  id = "stock-assistant"
-}
-
-import {
-  to = koyeb_service.stock_assistant
-  id = "stock-assistant/stock-assistant-service"
-}
-
 resource "koyeb_app" "stock_assistant" {
   name = var.app_name
 }
