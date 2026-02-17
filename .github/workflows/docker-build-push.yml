@@ -37,6 +37,7 @@ jobs:
 
       # Step 4: Generate image metadata and tags
       - name: Extract Docker Metadata
+        id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
@@ -47,6 +48,7 @@ jobs:
 
       # Step 5: Build and push
       - name: Build and Push Docker Image
+        id: build-and-push
         uses: docker/build-push-action@v5
         with:
           context: .
