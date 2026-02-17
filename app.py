@@ -4,7 +4,6 @@ from backend.agent import (
     create_financial_agent,
     run_financial_agent,
 )
-
 from backend.tools import (
     get_cached_companies,
 )
