@@ -5,6 +5,7 @@ on:
 
 env:
   IMAGE_NAME: stock-assistant
+  APP_NAME: stock-assistant
   TF_WORKING_DIR: ./terraform
   TF_VERSION: "1.5.7"
   KOYEB_TOKEN: ${{ secrets.KOYEB_TOKEN }}
@@ -21,6 +22,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # had to use this as don't have terrafrom state
+      # TODO: Add terraform cloud to manage state and remove this step
+      - name: Delete Existing App
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
+          export PATH=$PATH:$HOME/.koyeb/bin
+
+          koyeb service delete ${{ env.APP_NAME }}-service --app ${{ env.APP_NAME }} || true
+          koyeb app delete ${{ env.APP_NAME }} || true
+
+          echo "Waiting 2 minutes for deletion to complete..."
+          sleep 120
+          echo "✅ Deletion complete!"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -29,16 +44,6 @@ jobs:
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
-
-      # - name: Terraform Import
-      #   working-directory: ${{ env.TF_WORKING_DIR }}
-      #   run: |
-      #     terraform import koyeb_app.stock_assistant ${{ vars.APP_NAME }} || true
-      #     terraform import koyeb_service.stock_assistant ${{ vars.APP_NAME }}/${{ vars.APP_NAME }}-service || true
-
-      # - name: Terraform Destroy
-      #   working-directory: ${{ env.TF_WORKING_DIR }}
-      #   run: terraform destroy -auto-approve || true
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
