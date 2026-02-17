@@ -30,10 +30,16 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
+      - name: Terraform Import
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform import koyeb_app.stock_assistant ${{ vars.APP_NAME }} || true
+          terraform import koyeb_service.stock_assistant ${{ vars.APP_NAME }}/${{ vars.APP_NAME }}-service || true
+
       - name: Terraform Destroy
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform destroy -auto-approve || true
-        
+
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan       
