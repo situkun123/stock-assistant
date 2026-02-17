@@ -1,9 +1,3 @@
-variable "koyeb_api_key" {
-  description = "Koyeb API key"
-  type        = string
-  sensitive   = true
-}
-
 variable "app_name" {
   description = "Application name on Koyeb"
   type        = string
