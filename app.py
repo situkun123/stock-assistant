@@ -1,4 +1,5 @@
 import os
+
 import chainlit as cl
 from dotenv import load_dotenv
 
@@ -42,7 +43,7 @@ def auth_callback(username: str, password: str):
         )
     else:
         return None
-    
+
 
 @cl.on_chat_start
 async def start():
@@ -63,7 +64,7 @@ async def start():
     ]
 
     await cl.Message(
-        content=f"""👋 Welcome to the Financial Analysis Assistant! Ask me anything about stocks, companies, or financial metrics. It is best to use the stock symbol (e.g., AAPL for Apple) for more accurate results, Here are some example actions to get you started:""",
+        content="""👋 Welcome to the Financial Analysis Assistant! Ask me anything about stocks, companies, or financial metrics. It is best to use the stock symbol (e.g., AAPL for Apple) for more accurate results, Here are some example actions to get you started:""",
         actions=actions
     ).send()
 
