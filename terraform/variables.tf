@@ -29,6 +29,18 @@ variable "duck_db_token" {
   sensitive   = true
 }
 
+variable "chainlit_auth_secret" {
+  description = "Chainlit authentication secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "auth_users" {
+  description = "Chainlit auth users (format: email:password)"
+  type        = string
+  sensitive   = true
+}
+
 variable "region" {
   description = "Koyeb deployment region"
   type        = string

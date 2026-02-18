@@ -35,6 +35,16 @@ resource "koyeb_service" "stock_assistant" {
       value = var.duck_db_token
     }
 
+    env {
+      key   = "CHAINLIT_AUTH_SECRET"
+      value = var.chainlit_auth_secret
+    }
+
+    env {
+      key   = "AUTH_USERS"
+      value = var.auth_users
+    }
+
     # Port configuration
     ports {
       port     = 8000
