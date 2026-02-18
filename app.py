@@ -24,9 +24,16 @@ async def start():
 async def main(message: cl.Message):
     """Handle incoming messages from the user."""
     app = cl.user_session.get("agent")
+    thread_id = cl.user_session.get("thread_id") 
     msg = cl.Message(content="")
+
     await msg.send()
-    response, cost = run_financial_agent(app, message.content, enable_logging=True)
+    response, cost = run_financial_agent(
+        app, 
+        message.content, 
+        thread_id=thread_id, 
+        enable_logging=True
+    )
 
     # Update the message with the result
     msg.content = response

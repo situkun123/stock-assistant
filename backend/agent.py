@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
@@ -56,10 +58,7 @@ def should_continue(state: AgentState):
 # AGENT CREATION
 # ============================================================================
 def create_financial_agent():
-    """
-    Create financial analysis agent using LangGraph StateGraph.
-    """
-    # Setup
+    """Create financial analysis agent using LangGraph StateGraph."""
     tools = [get_stock_symbol, get_company_info, get_stock_history, get_financial_statements, correct_period_parameter]
     model = ChatOpenAI(
         model="gpt-4o-mini",
@@ -67,13 +66,10 @@ def create_financial_agent():
         temperature=0
     )
 
-    # Build graph
     workflow = StateGraph(AgentState)
     workflow.add_node("agent", lambda state: call_model(state, model, tools))
     workflow.add_node("tools", ToolNode(tools))
-    # workflow.add_node("error_corrector", llm_correct_period_parameters)
 
-    # Define flow
     workflow.set_entry_point("agent")
     workflow.add_conditional_edges("agent", should_continue, {
         "tools": "tools",
@@ -83,13 +79,14 @@ def create_financial_agent():
                                    lambda state: "tools" if state["messages"][-1].tool_calls else "__end__")
     workflow.add_edge("tools", "agent")
 
-    return workflow.compile()
+    conn = sqlite3.connect("/app/data/checkpoints.db", check_same_thread=False)
+    memory = SqliteSaver(conn)
+
+    return workflow.compile(checkpointer=memory)
 
 
-def run_financial_agent(app, user_query: str, enable_logging: bool = True):
+def run_financial_agent(app, user_query: str, thread_id: str = "default", enable_logging: bool = True):
     """Execute agent and return response with cost breakdown."""
-
-    # Default system prompt if none provided
 
     system_prompt = """You are a financial analysis assistant. Your role is to:
                 - Analyze stock data and financial statements objectively
@@ -97,21 +94,21 @@ def run_financial_agent(app, user_query: str, enable_logging: bool = True):
                 - Use available tools to gather accurate information
                 - Always cite your data sources"""
 
-    # Build initial messages with system prompt
     initial_messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=user_query)
     ]
+    config = {"configurable": {"thread_id": thread_id}}
 
     with get_openai_callback() as cb:
-        result = app.invoke({"messages": initial_messages})
+        result = app.invoke({"messages": initial_messages}, config=config)
         tool_calls = 0
         tools_used = {}
+
         for message in result["messages"]:
             if hasattr(message, "tool_calls") and message.tool_calls:
                 tool_calls += len(message.tool_calls)
 
-                # Count tool usage
                 for tool_call in message.tool_calls:
                     tool_name = tool_call.get("name", "Unknown")
                     tools_used[tool_name] = tools_used.get(tool_name, 0) + 1
