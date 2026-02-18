@@ -60,7 +60,12 @@ stock-assiant/
    Using DockerHub image:
 ```bash
    docker login
-   docker compose --profile hub up -d
+   docker compose --profile hub up
+```
+
+   Stoping DockerHub image:
+```bash
+   docker compose --profile hub down
 ```
 
 4. **Access the application:**
