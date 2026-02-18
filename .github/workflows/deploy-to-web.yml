@@ -12,6 +12,8 @@ env:
   TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
   TF_VAR_duck_db_token: ${{ secrets.DUCK_DB_TOKEN }}
   TF_VAR_docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/stock-assistant:latest
+  TF_VAR_chainlit_auth_secret: ${{ secrets.CHAINLIT_AUTH_SECRET }}
+  TF_VAR_auth_users: ${{ secrets.AUTH_USERS }}
 
 jobs:
   deploy:
@@ -57,4 +59,8 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve  
+        run: | 
+          terraform apply -auto-approve
+          echo "Please wait 3 mins for the app to be deployed and healthy on Koyeb..."
+
+      

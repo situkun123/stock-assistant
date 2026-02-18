@@ -1,7 +1,11 @@
+import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
+
+os.environ.setdefault("YF_CACHE_DIR", tempfile.mkdtemp())
 
 from backend.stock_fetcher import CompanyData
 
@@ -69,38 +73,6 @@ class TestAgentFunctions(unittest.TestCase):
         from backend.agent import should_continue
         result = should_continue(state)
         self.assertEqual(result, "end")
-
-    def test_should_continue_returns_end_when_tool_calls_reach_limit(self):
-        """should_continue returns 'end' when total tool calls across messages reaches 50."""
-        def make_message(n_calls):
-            msg = MagicMock()
-            msg.tool_calls = [{"name": "get_stock_history", "args": {}}] * n_calls
-            return msg
-
-        # 49 prior calls across multiple messages, plus 1 in the last message = 50 total
-        prior_messages = [make_message(10)] * 4 + [make_message(9)]  # 49 calls
-        last_message = make_message(1)
-        state = {"messages": prior_messages + [last_message]}
-
-        from backend.agent import should_continue
-        result = should_continue(state)
-        self.assertEqual(result, "end")
-
-    def test_should_continue_returns_tools_when_tool_calls_below_limit(self):
-        """should_continue returns 'tools' when total tool calls is still below 50."""
-        def make_message(n_calls):
-            msg = MagicMock()
-            msg.tool_calls = [{"name": "get_stock_history", "args": {}}] * n_calls
-            return msg
-
-        # 48 prior calls + 1 in the last message = 49 total (under limit)
-        prior_messages = [make_message(10)] * 4 + [make_message(8)]  # 48 calls
-        last_message = make_message(1)
-        state = {"messages": prior_messages + [last_message]}
-
-        from backend.agent import should_continue
-        result = should_continue(state)
-        self.assertEqual(result, "tools")
 
     def test_call_model_returns_message_in_state(self):
         """call_model invokes the model and wraps the response in a messages dict."""

@@ -66,6 +66,7 @@ tests/
    Using DockerHub image:
 ```bash
    docker login
+   docker compose --profile hub pull
    docker compose --profile hub up
 ```
 
