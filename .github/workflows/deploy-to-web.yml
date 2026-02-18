@@ -14,7 +14,7 @@ env:
   TF_VAR_docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/stock-assistant:latest
   TF_VAR_chainlit_auth_secret: ${{ secrets.CHAINLIT_AUTH_SECRET }}
   TF_VAR_auth_users: ${{ secrets.AUTH_USERS }}
-  
+
 jobs:
   deploy:
     name: Deploy to Koyeb via Terraform
@@ -59,4 +59,8 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve  
+        run: | 
+          terraform apply -auto-approve
+          echo "Please wait 3 mins for the app to be deployed and healthy on Koyeb..."
+
+      
