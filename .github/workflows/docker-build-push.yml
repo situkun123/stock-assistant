@@ -1,12 +1,9 @@
 name: Build and Push Docker Image
 
 on:
-  # push:
-  #   branches:
-  #     - main        # Trigger on push to main
-  # pull_request:
-  #   branches:
-  #     - main        # Run on PRs to main (build only, no push)
+  push:
+    branches:
+      - main        # Trigger on push to main
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 env:
