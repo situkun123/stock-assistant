@@ -13,6 +13,7 @@ from backend.tools import (
 
 ENABLE_LOGGING = os.getenv("ENABLE_LOGGING", "false").lower() == "true"
 load_dotenv()
+print(f"Logging enabled: {ENABLE_LOGGING}")
 
 def load_users():
     """Load users from AUTH_USERS env variable"""

@@ -28,6 +28,7 @@ dist/
 build/
 out/
 coverage/
+data/
 
 # OS files
 .DS_Store
@@ -48,6 +49,7 @@ Thumbs.db
 .sass-cache/
 .cache/
 *.lock
+test.py
 
 # Terraform
 terraform/.terraform/
@@ -56,3 +58,4 @@ terraform/*.tfstate.backup
 terraform/.terraform.lock.hcl
 terraform/terraform.tfvars
 
+test.py
