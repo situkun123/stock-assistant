@@ -10,6 +10,15 @@ terraform {
 provider "koyeb" {
 }
 
+resource "koyeb_secret" "dockerhub" {
+  name = "dockersecret"
+  
+  registry {
+    username = var.dockerhub_username
+    password = var.dockerhub_token
+  }
+}
+
 resource "koyeb_app" "stock_assistant" {
   name = var.app_name
 }
@@ -22,7 +31,7 @@ resource "koyeb_service" "stock_assistant" {
     regions = [var.region]
     docker {
       image                 = var.docker_image    # e.g., "your-dockerhub-username/stock-assistant:latest"
-      image_registry_secret = var.registry_secret # Optional: for private registries
+      image_registry_secret = koyeb_secret.dockerhub.name
     }
 
     env {

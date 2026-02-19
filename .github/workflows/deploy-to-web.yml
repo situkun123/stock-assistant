@@ -14,6 +14,8 @@ env:
   TF_VAR_docker_image: ${{ secrets.DOCKERHUB_USERNAME }}/stock-assistant:latest
   TF_VAR_chainlit_auth_secret: ${{ secrets.CHAINLIT_AUTH_SECRET }}
   TF_VAR_auth_users: ${{ secrets.AUTH_USERS }}
+  TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+  TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
   deploy:
