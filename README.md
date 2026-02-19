@@ -15,6 +15,7 @@ stock-assiant/
 ├── Dockerfile            # Dockerfile for building the application
 ├── README.md             # Project documentation
 ├── requirements.txt      # Python dependencies
+├── env.example           # Example environment variables file   
 tests/
 ├── __init__.py
 └── unit_test.py
@@ -131,7 +132,8 @@ tests/
 ```
 2. **Add Koyeb token to GitHub Secrets:**
 ```
-   GitHub Repo → Settings → Secrets and variables → Actions → Secrets tab
+   # call it KOYEB_TOKEN
+   GitHub Repo → Settings → Secrets and variables → Actions → Secrets tab 
 ```
 ### Using GitHub Actions Workflow 
 - Workflow called **Deploy to Koyeb** triggers manually in the action section of GitHub.

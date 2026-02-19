@@ -14,7 +14,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DUCK_DB_TOKEN=${DUCK_DB_TOKEN}
-      - ENABLE_LOGGING=false
+      - ENABLE_LOGGING=true
       - AUTH_USERS=${AUTH_USERS}
       - CHAINLIT_AUTH_SECRET=${CHAINLIT_AUTH_SECRET}
     volumes:
