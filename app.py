@@ -12,7 +12,7 @@ from backend.tools import (
 )
 
 load_dotenv()
-ENABLE_LOGGING = os.getenv("ENABLE_LOGGING", "false").lower() == "true"
+ENABLE_LOGGING = os.getenv("ENABLE_LOGGING", "true").lower() == "true"
 
 print(f"Logging enabled: {ENABLE_LOGGING}")
 
