@@ -1,9 +1,43 @@
+# Version control
 .git
+.gitignore
+
+# Python
 .venv
-__pycache__
+venv/
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+dist/
+build/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# IDE and tools
+.vscode/
+.idea/
 .DS_Store
 .ruff_cache
-.github
-.claude
-.env
+
+# CI/CD
+.github/
+.claude/
+
+# Documentation and tests
+*.md
+tests/
+docs/
+
+# Data and logs
+*.log
+data/
+yf_cache/
+*.db
