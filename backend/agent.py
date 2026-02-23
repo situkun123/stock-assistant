@@ -65,7 +65,7 @@ def trim_message_history(messages: Sequence[BaseMessage], max_tokens: int = 1600
 def call_model(state: AgentState, model, tools):
     """Call LLM with tool binding to decide next action."""
     messages = state["messages"]
-    messages = trim_message_history(messages, max_tokens=20000)
+    messages = trim_message_history(messages, max_tokens=40000)
 
     try:
         input_tokens = model.get_num_tokens_from_messages(messages)

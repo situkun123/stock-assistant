@@ -24,7 +24,7 @@ def get_cached_companies():
     """Return list of currently cached company tickers."""
     return list(_company_cache.keys())
 
-def truncate_tool_output(text: str, max_tokens: int = 3000) -> str:
+def truncate_tool_output(text: str, max_tokens: int = 5000) -> str:
     """Truncate tool output to prevent exceeding LLM token limits (200k budget)."""
     enc = tiktoken.encoding_for_model("gpt-4o-mini")
     tokens = enc.encode(text)
@@ -42,7 +42,7 @@ def get_company_info(ticker: str):
     """Fetch key company metrics like P/E ratio, Market Cap, and business summary."""
     client = get_company_client(ticker)
     result = client.get_info().to_string()
-    return truncate_tool_output(result, max_tokens=3000)
+    return truncate_tool_output(result, max_tokens=5000)
 
 @tool
 def get_stock_history(ticker: str, period: str = "1mo", interval: str = "1d"):
@@ -64,7 +64,7 @@ def get_financial_statements(ticker: str):
     """Fetch the annual income statement and financial metrics."""
     client = get_company_client(ticker)
     result = client.get_financials().to_string()
-    return truncate_tool_output(result, max_tokens=4000)
+    return truncate_tool_output(result, max_tokens=5000)
 
 @tool
 def correct_period_parameter(invalid_period: str) -> str:
@@ -133,7 +133,7 @@ def extract_stock_mentions(query: str) -> dict:
     Extract stock ticker symbols and company names from a user query,
     then search for their symbols. Returns structured data ready for further analysis.
     """
-    query = truncate_tool_output(query, max_tokens=1000)
+    query = truncate_tool_output(query, max_tokens=1500)
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     structured_model = model.with_structured_output(StockMentions)
 
