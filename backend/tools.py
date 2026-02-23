@@ -24,51 +24,25 @@ def get_cached_companies():
     """Return list of currently cached company tickers."""
     return list(_company_cache.keys())
 
-def truncate_to_token_limit(text: str, max_tokens: int = 500) -> str:
+def truncate_tool_output(text: str, max_tokens: int = 3000) -> str:
+    """Truncate tool output to prevent exceeding LLM token limits (200k budget)."""
     enc = tiktoken.encoding_for_model("gpt-4o-mini")
     tokens = enc.encode(text)
     if len(tokens) > max_tokens:
         tokens = tokens[:max_tokens]
-        return enc.decode(tokens) + "... [truncated]"
+        return enc.decode(tokens) + f"\n... [output truncated from {len(tokens)} to {max_tokens} tokens]"
     return text
 
 
 # ============================================================================
 # TOOLS
 # ============================================================================
-# @tool
-# def validate_stock_symbol(symbol: str) -> str:
-#     """
-#     Validate if a stock symbol is correct for Yahoo Finance and suggest corrections if needed use LLM.
-#     """
-
-#     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
-#     prompt = f"""Validate the stock ticker symbol '{symbol}' for Yahoo Finance.
-
-#         Instructions:
-#         1. If '{symbol}' is a valid Yahoo Finance ticker, respond with: "VALID: {symbol}"
-#         2. If '{symbol}' is incorrect but you know the correct ticker, respond with: "CORRECTED: [correct_symbol] (was: {symbol})"
-#         3. If '{symbol}' looks like a company name instead of a ticker, respond with: "SYMBOL: [ticker] (for company: {symbol})"
-#         4. If you're not sure or it's not publicly traded, respond with: "UNKNOWN: {symbol}"
-
-#         Examples:
-#         - Input: "AAPL" → "VALID: AAPL"
-#         - Input: "APPL" → "CORRECTED: AAPL (was: APPL)"
-#         - Input: "Apple" → "SYMBOL: AAPL (for company: Apple)"
-#         - Input: "GOOG" → "CORRECTED: GOOGL (was: GOOG)" [Note: GOOGL is the primary ticker]
-#         - Input: "XYZ123" → "UNKNOWN: XYZ123"
-
-#         Respond with ONLY one of the formats above, nothing else."""
-
-#     response = llm.invoke(prompt)
-#     return response.content.strip()
-
 @tool
 def get_company_info(ticker: str):
     """Fetch key company metrics like P/E ratio, Market Cap, and business summary."""
     client = get_company_client(ticker)
-    return client.get_info().to_string()
+    result = client.get_info().to_string()
+    return truncate_tool_output(result, max_tokens=3000)
 
 @tool
 def get_stock_history(ticker: str, period: str = "1mo", interval: str = "1d"):
@@ -82,13 +56,15 @@ def get_stock_history(ticker: str, period: str = "1mo", interval: str = "1d"):
     then pass the corrected value here.
     """
     client = get_company_client(ticker)
-    return client.get_ticker_data(period=period, interval=interval).tail(10).to_string()
+    result = client.get_ticker_data(period=period, interval=interval).tail(10).to_string()
+    return truncate_tool_output(result, max_tokens=5000)
 
 @tool
 def get_financial_statements(ticker: str):
     """Fetch the annual income statement and financial metrics."""
     client = get_company_client(ticker)
-    return client.get_financials().to_string()
+    result = client.get_financials().to_string()
+    return truncate_tool_output(result, max_tokens=4000)
 
 @tool
 def correct_period_parameter(invalid_period: str) -> str:
@@ -157,7 +133,7 @@ def extract_stock_mentions(query: str) -> dict:
     Extract stock ticker symbols and company names from a user query,
     then search for their symbols. Returns structured data ready for further analysis.
     """
-    query = truncate_to_token_limit(query, max_tokens=1000)
+    query = truncate_tool_output(query, max_tokens=1000)
     model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     structured_model = model.with_structured_output(StockMentions)
 
@@ -215,14 +191,18 @@ def extract_stock_mentions(query: str) -> dict:
                 "search_result": search_result
             })
 
+    # Limit resolved results to prevent token bloat
+    resolved_limited = resolved[:20] if len(resolved) > 20 else resolved
+
     return {
         "mentions": {
             "symbols": result.symbols,
             "companies": result.companies
         },
-        "resolved": resolved,
+        "resolved": resolved_limited,
         "summary": (
             f"Found {len(result.symbols)} ticker(s) and {len(result.companies)} company name(s). "
-            f"Resolved {sum(1 for r in resolved if r['symbol'])} to valid symbols."
+            f"Resolved {sum(1 for r in resolved_limited if r['symbol'])} to valid symbols. "
+            f"(Limited to {len(resolved_limited)} results)"
         )
     }

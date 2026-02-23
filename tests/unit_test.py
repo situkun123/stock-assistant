@@ -76,14 +76,15 @@ class TestAgentFunctions(unittest.TestCase):
 
     def test_call_model_returns_message_in_state(self):
         """call_model invokes the model and wraps the response in a messages dict."""
+        from langchain_core.messages import HumanMessage
+
         mock_response = MagicMock()
         mock_model = MagicMock()
         mock_model_with_tools = MagicMock()
         mock_model.bind_tools.return_value = mock_model_with_tools
         mock_model_with_tools.invoke.return_value = mock_response
 
-        mock_message = MagicMock()
-        state = {"messages": [mock_message]}
+        state = {"messages": [HumanMessage(content="Test message")]}
         tools = []
 
         from backend.agent import call_model

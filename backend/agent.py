@@ -65,7 +65,15 @@ def trim_message_history(messages: Sequence[BaseMessage], max_tokens: int = 1600
 def call_model(state: AgentState, model, tools):
     """Call LLM with tool binding to decide next action."""
     messages = state["messages"]
-    messages = trim_message_history(messages, max_tokens=160000)
+    messages = trim_message_history(messages, max_tokens=20000)
+
+    try:
+        input_tokens = model.get_num_tokens_from_messages(messages)
+    except Exception:
+        input_tokens = "unknown"
+
+    print(f"📨 Next call input: {len(messages)} messages, ~{input_tokens} tokens")
+
     model_with_tools = model.bind_tools(tools)
     response = model_with_tools.invoke(messages)
     return {"messages": [response]}
